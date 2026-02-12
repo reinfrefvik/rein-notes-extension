@@ -1,0 +1,142 @@
+{
+  "name": "notes-test",
+  "displayName": "notes_test",
+  "description": "test extension for editiing notes",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.109.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "notes-sidebar",
+          "title": "Notes",
+          "icon": "$(notebook)"
+        }
+      ]
+    },
+    "views": {
+      "notes-sidebar": [
+        {
+          "id": "notesView",
+          "name": "Notes",
+          "type": "webview"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "notes.addNote",
+        "title": "Notes: Add Note"
+      },
+      {
+        "command": "notes.refresh",
+        "title": "Notes: Refresh"
+      },
+      {
+        "command": "notes.createNote",
+        "title": "Create Note"
+      },
+      {
+        "command": "notes.editNote",
+        "title": "Edit",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "notes.deleteNote",
+        "title": "Delete",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "notes.createFileNote",
+        "title": "Notes: Add Note to File",
+        "icon": "$(note)"
+      },
+      {
+        "command": "notes.revealInSidebar",
+        "title": "Open in Notes Panel",
+        "icon": "$(link-external)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "notes.addNote",
+          "when": "view == notesView",
+          "group": "navigation"
+        },
+        {
+          "command": "notes.refresh",
+          "when": "view == notesView",
+          "group": "navigation"
+        }
+      ],
+      "comments/commentThread/title": [
+        {
+          "command": "notes.deleteNote",
+          "when": "commentController == notes",
+          "group": "navigation"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "notes.createNote",
+          "when": "commentController == notes && commentThreadIsEmpty",
+          "group": "inline"
+        }
+      ],
+      "comments/comment/title": [
+        {
+          "command": "notes.editNote",
+          "when": "commentController == notes",
+          "group": "navigation"
+        }
+      ],
+      "comments/comment/context": [
+        {
+          "command": "notes.editNote",
+          "when": "commentController == notes",
+          "group": "inline"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "notes.createFileNote",
+          "when": "resourceScheme == file",
+          "group": "2_workspace"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "notes.createFileNote",
+          "when": "resourceScheme == file",
+          "group": "1_close"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.109.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.54.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
