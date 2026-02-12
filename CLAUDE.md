@@ -26,17 +26,39 @@ npm run test     # runs vscode-test
 ## Architecture
 
 **Single-file extension** (`src/extension.ts`) containing:
-- `activate()` - Entry point, registers commands and tree view
-- `NotesProvider` - TreeDataProvider implementation for the sidebar view
-- `NoteItem` - TreeItem wrapper for individual notes
-- Helper functions: `getWorkspaceFolder()`, `isNoteLike()`, `truncate()`
+- `activate()` - Entry point, registers commands, webview, and comment controller
+- `NotesViewProvider` - WebviewViewProvider for the sidebar panel with full note management UI
+- `NoteComment` - Comment implementation for inline notes in editors
+- `loadCommentThreads()` - Syncs notes with file-linked comments
+- Helper functions: `getWorkspaceFolder()`, `isNoteLike()`, `createNoteComment()`
 
 **Commands registered:**
-- `notes.addNote` - Create new note via input boxes
-- `notes.refresh` - Refresh the tree view
-- `notes.openNote` - Open note as read-only markdown document
+- `notes.addNote` - Create project-wide note via input boxes
+- `notes.refresh` - Refresh sidebar and comment threads
+- `notes.createNote` - Create note from inline comment UI
+- `notes.editNote` - Edit existing note
+- `notes.deleteNote` - Delete note and its comment thread
+- `notes.createFileNote` - Create note linked to current file (from explorer/editor context menu)
+- `notes.revealInSidebar` - Open note in sidebar panel from inline comment
 
-**Data format:** Notes are `{ id: string, title: string, text: string }` stored in `.vscode/notes.json`
+**Data format:** Notes stored in `.vscode/notes.json`:
+```typescript
+{
+  id: string;
+  title: string;
+  text: string;
+  fileUri?: string;    // Workspace-relative path for file-linked notes
+  lineStart?: number;  // 0-based line number
+  lineEnd?: number;    // Optional end line for range
+  closed?: boolean;    // Resolved/closed status
+}
+```
+
+**UI Features:**
+- Webview sidebar with collapsible sections (Current File, Project Wide, Other Files, Closed)
+- Inline comments via VS Code Comments API for file-linked notes
+- Filter to show only current file's notes
+- Close/reopen notes without deleting
 
 ## Testing
 
