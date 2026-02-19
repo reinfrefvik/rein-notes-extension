@@ -1,8 +1,9 @@
 {
   "name": "notes-test",
   "displayName": "notes_test",
+  "publisher": "rein",
   "description": "test extension for editiing notes",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.109.0"
   },

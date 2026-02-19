@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-VS Code extension for managing notes within the editor. Notes are stored as JSON in `.vscode/notes.json` within the workspace.
+VS Code extension for managing notes within the editor. Notes are stored as JSON in VS Code's extension storage directory (`context.storageUri`), keeping them out of the workspace and git.
 
 ## Commands
 
@@ -41,7 +41,7 @@ npm run test     # runs vscode-test
 - `notes.createFileNote` - Create note linked to current file (from explorer/editor context menu)
 - `notes.revealInSidebar` - Open note in sidebar panel from inline comment
 
-**Data format:** Notes stored in `.vscode/notes.json`:
+**Data format:** Notes stored in `reintest-notes.json` within VS Code's storage directory:
 ```typescript
 {
   id: string;

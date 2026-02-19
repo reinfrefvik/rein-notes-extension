@@ -10,14 +10,14 @@ type Note = {
 	closed?: boolean;      // Whether the note is closed/resolved
 };
 
-const NOTES_REL_PATH = ".vscode/notes.json";
+const NOTES_FILENAME = "reintest-notes.json";
 
 let commentController: vscode.CommentController;
 let notesViewProvider: NotesViewProvider;
 const threadMap = new Map<string, vscode.CommentThread>();
 
 export function activate(context: vscode.ExtensionContext) {
-	notesViewProvider = new NotesViewProvider(context.extensionUri);
+	notesViewProvider = new NotesViewProvider(context.extensionUri, context.storageUri);
 	context.subscriptions.push(
 		vscode.window.registerWebviewViewProvider("notesView", notesViewProvider)
 	);
@@ -309,7 +309,10 @@ class NotesViewProvider implements vscode.WebviewViewProvider {
 	private _currentFileUri?: string;
 	private _disposables: vscode.Disposable[] = [];
 
-	constructor(private readonly _extensionUri: vscode.Uri) { }
+	constructor(
+		private readonly _extensionUri: vscode.Uri,
+		private readonly _storageUri: vscode.Uri | undefined
+	) { }
 
 	resolveWebviewView(webviewView: vscode.WebviewView) {
 		this._view = webviewView;
@@ -476,10 +479,9 @@ class NotesViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	async loadNotes(): Promise<Note[]> {
-		const ws = getWorkspaceFolder();
-		if (!ws) { return []; }
+		if (!this._storageUri) { return []; }
 
-		const uri = vscode.Uri.joinPath(ws.uri, NOTES_REL_PATH);
+		const uri = vscode.Uri.joinPath(this._storageUri, NOTES_FILENAME);
 
 		try {
 			const bytes = await vscode.workspace.fs.readFile(uri);
@@ -493,17 +495,16 @@ class NotesViewProvider implements vscode.WebviewViewProvider {
 	}
 
 	async saveNotes(notes: Note[]): Promise<void> {
-		const ws = getWorkspaceFolder();
-		if (!ws) { return; }
+		if (!this._storageUri) { return; }
 
-		const vscodeDir = vscode.Uri.joinPath(ws.uri, ".vscode");
+		// Ensure storage directory exists
 		try {
-			await vscode.workspace.fs.stat(vscodeDir);
+			await vscode.workspace.fs.stat(this._storageUri);
 		} catch {
-			await vscode.workspace.fs.createDirectory(vscodeDir);
+			await vscode.workspace.fs.createDirectory(this._storageUri);
 		}
 
-		const uri = vscode.Uri.joinPath(ws.uri, NOTES_REL_PATH);
+		const uri = vscode.Uri.joinPath(this._storageUri, NOTES_FILENAME);
 		const content = JSON.stringify(notes, null, 2);
 		await vscode.workspace.fs.writeFile(uri, new TextEncoder().encode(content));
 	}
@@ -537,9 +538,6 @@ class NotesViewProvider implements vscode.WebviewViewProvider {
 					<div class="note-header" onclick="toggle('${escapeHtml(n.id)}')">
 						<div class="note-header-top">
 							<span class="note-title">${isClosed ? '<span class="closed-indicator">✓</span> ' : ""}${escapeHtml(n.title)}</span>
-							<button class="close-toggle-btn" onclick="event.stopPropagation(); toggleClosed('${escapeHtml(n.id)}')" title="${isClosed ? "Reopen note" : "Close note"}">
-								${isClosed ? "↩" : "✓"}
-							</button>
 						</div>
 						<span class="note-preview">${escapeHtml(n.text.replace(/\s+/g, " ").slice(0, 30))}</span>
 					</div>
